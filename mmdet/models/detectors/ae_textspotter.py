@@ -452,7 +452,6 @@ class AE_TextSpotter(BaseDetector):
         """Test without augmentation."""
         with torch.no_grad():
             x = self.extract_feat(img)
-
             # two-stream rpn
             rpn_outs = self.simple_test_rpn(x, img_meta, self.test_cfg.text_rpn, self.test_cfg.char_rpn) \
                 if proposals is None else proposals
@@ -475,16 +474,17 @@ class AE_TextSpotter(BaseDetector):
             texts, text_scores = self.get_text_content(rects, char_det_bboxes, char_det_labels, self.label2char)
 
             # re-scoring
-            tokens = self.get_token(self.bert_tokenizer, texts).to(x[0].device)
-            segments = x[0].new_zeros((tokens.size(0), tokens.size(1)), dtype=torch.long)
-            x_nlp = self.bert_model(tokens, token_type_ids=segments)[0]
-            outputs = self.lang_model(x_nlp)
-            cls_scores = outputs[0]
-            cls_scores = F.softmax(cls_scores, dim=1)
-            cls_scores[cls_scores < self.test_cfg.ignore_thr] = 0
-            scores = ((1 - self.lm_cfg.lang_score_weight) * text_det_bboxes[:, 4] +
-                      self.lm_cfg.lang_score_weight * cls_scores[:, 1]).cpu().numpy()
-
+            # tokens = self.get_token(self.bert_tokenizer, texts).to(x[0].device)
+            # segments = x[0].new_zeros((tokens.size(0), tokens.size(1)), dtype=torch.long)
+            # x_nlp = self.bert_model(tokens, token_type_ids=segments)[0]
+            # outputs = self.lang_model(x_nlp)
+            # cls_scores = outputs[0]
+            # cls_scores = F.softmax(cls_scores, dim=1)
+            # cls_scores[cls_scores < self.test_cfg.ignore_thr] = 0
+            # scores = ((1 - self.lm_cfg.lang_score_weight) * text_det_bboxes[:, 4] +
+            #           self.lm_cfg.lang_score_weight * cls_scores[:, 1]).cpu().numpy()
+            scores = text_det_bboxes[:, 4].cpu().numpy()
+            
             # nms
             rects, scores, inds = poly_nms(rects, scores, self.test_cfg.poly_iou, 0.0, return_ind=True)
             texts = [texts[i] for i in inds]

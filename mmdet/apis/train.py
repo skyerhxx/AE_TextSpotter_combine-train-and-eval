@@ -8,7 +8,7 @@ from mmcv.runner import DistSamplerSeedHook, Runner, obj_from_dict
 
 from mmdet import datasets
 from mmdet.core import (CocoDistEvalmAPHook, CocoDistEvalRecallHook,
-                        DistEvalmAPHook, DistOptimizerHook, Fp16OptimizerHook)
+                        DistEvalmAPHook, DistOptimizerHook, Fp16OptimizerHook, ReCTSEvalHook)
 from mmdet.datasets import DATASETS, build_dataloader
 from mmdet.models import RPN
 from .env import get_root_logger
@@ -182,9 +182,11 @@ def _dist_train(model, dataset, cfg, validate=False):
                 runner.register_hook(
                     CocoDistEvalmAPHook(val_dataset_cfg, **eval_cfg))
             else:
+                # runner.register_hook(
+                #     DistEvalmAPHook(val_dataset_cfg, **eval_cfg))
                 runner.register_hook(
-                    DistEvalmAPHook(val_dataset_cfg, **eval_cfg))
-
+                    ReCTSEvalHook(val_dataset_cfg, **eval_cfg))
+            
     if cfg.resume_from:
         runner.resume(cfg.resume_from)
     elif cfg.load_from:

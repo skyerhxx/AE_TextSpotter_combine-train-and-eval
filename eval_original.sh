@@ -1,0 +1,1 @@
+python tools/rects_eval.py

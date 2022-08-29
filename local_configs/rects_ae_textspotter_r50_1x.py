@@ -1,5 +1,6 @@
 # model settings
-data_root = 'data/ReCTS/'
+data_root = 'data/ReCTS_small/'
+# data_root = 'data/ReCTS/'
 char_dict_file = 'char_dict.json'
 model = dict(
     type='AE_TextSpotter',
@@ -133,7 +134,36 @@ train_cfg = dict(
         mask_size=28,
         pos_weight=-1,
         debug=False))
-test_cfg=None
+test_cfg = dict(
+    text_rpn=dict(
+        nms_across_levels=False,
+        nms_pre=900,
+        nms_post=900,
+        max_num=900,
+        nms_thr=0.7,
+        min_bbox_size=0),
+    char_rpn=dict(
+        nms_across_levels=False,
+        nms_pre=900,
+        nms_post=900,
+        max_num=900,
+        nms_thr=0.5,  # 0.7
+        min_bbox_size=0),
+    text_rcnn=dict(
+        score_thr=0.01,
+        nms=dict(type='nms', iou_thr=0.9),
+        max_per_img=500,
+        mask_thr_binary=0.5),
+    char_rcnn=dict(
+        score_thr=0.1,
+        nms=dict(type='nms', iou_thr=0.1),
+        max_per_img=200,
+        mask_thr_binary=0.5),
+    recognizer=dict(
+        char_dict_file=data_root + char_dict_file,
+        char_assign_iou=0.5),
+    poly_iou=0.1,
+    ignore_thr=0.3)
 # dataset settings
 dataset_type = 'ReCTSDataset'
 img_norm_cfg = dict(
@@ -154,6 +184,21 @@ train_pipeline = [
     dict(type='DefaultFormatBundle'),
     dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels', 'gt_masks']),
 ]
+test_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(
+        type='MultiScaleFlipAug',
+        img_scale=(1333, 800),
+        flip=False,
+        transforms=[
+            dict(type='Resize', keep_ratio=True),
+            dict(type='RandomFlip'),
+            dict(type='Normalize', **img_norm_cfg),
+            dict(type='Pad', size_divisor=32),
+            dict(type='ImageToTensor', keys=['img']),
+            dict(type='Collect', keys=['img']),
+        ])
+]
 data = dict(
     imgs_per_gpu=2,
     workers_per_gpu=2,
@@ -165,9 +210,26 @@ data = dict(
         cache_file='tda_rects_train_cache_file.json',
         char_dict_file=char_dict_file,
         pipeline=train_pipeline),
+    val=dict(
+        type=dataset_type,
+        data_root=data_root,
+        ann_file='train/gt/',
+        img_prefix='train/img/',
+        cache_file='tda_rects_val_cache_file.json',
+        char_dict_file=char_dict_file,
+        pipeline=test_pipeline),
+    test=dict(
+        type=dataset_type,
+        data_root=data_root,
+        ann_file=None,
+        img_prefix='train/img/',
+        cache_file='tda_rects_val_cache_file.json',
+        char_dict_file=char_dict_file,
+        pipeline=test_pipeline)
 )
 # optimizer
 optimizer = dict(type='SGD', lr=0.02, momentum=0.9, weight_decay=0.0001)
+# optimizer = dict(type='SGD', lr=0.01, momentum=0.9, weight_decay=0.0001)
 optimizer_config = dict(grad_clip=dict(max_norm=35, norm_type=2))
 # learning policy
 lr_config = dict(
@@ -182,7 +244,7 @@ log_config = dict(
     interval=50,
     hooks=[
         dict(type='TextLoggerHook'),
-        # dict(type='TensorboardLoggerHook')
+        dict(type='TensorboardLoggerHook')
     ])
 # yapf:enable
 evaluation = dict(interval=1)

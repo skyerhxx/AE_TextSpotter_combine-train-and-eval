@@ -1,10 +1,17 @@
 import mmcv
 import os.path as osp
+import argparse
+ 
+parser = argparse.ArgumentParser()
+parser.add_argument("--data_root", type=str, default='results/original+sem/', required=True, help="save_path")
+opt = parser.parse_args()
 
-data_root = 'data/ReCTS/'
+# data_root = 'data/ReCTS/'
+# import pdb;pdb.set_trace()
+data_root = opt.data_root
 train_img_root = osp.join(data_root, 'train/img/')
 train_ann_root = osp.join(data_root, 'train/gt/')
-test_img_root = osp.join(data_root, 'test/img/')
+# test_img_root = osp.join(data_root, 'test/img/')
 
 
 def prepare_train_img_infos(cache_path, img_list_path=None):
@@ -121,7 +128,7 @@ if __name__ == '__main__':
                             osp.join(data_root, 'TDA_ReCTS_train_list.txt'))
     prepare_train_img_infos(osp.join(data_root, 'tda_rects_val_cache_file.json'),
                             osp.join(data_root, 'TDA_ReCTS_val_list.txt'))
-    prepare_test_img_infos(osp.join(data_root, 'tda_rects_test_cache_file.json'))
+    # prepare_test_img_infos(osp.join(data_root, 'tda_rects_test_cache_file.json'))
 
     # # combine img infos
     img_infos = mmcv.load(osp.join(data_root, 'tda_rects_train_cache_file.json')) + \
@@ -130,4 +137,4 @@ if __name__ == '__main__':
         mmcv.dump(img_infos, f, file_format='json', ensure_ascii=False)
 
     # # prepare char dict
-    prepare_char_dict(osp.join(data_root, 'TDA_ReCTS_train_list.txt'))
+    # prepare_char_dict(osp.join(data_root, 'TDA_ReCTS_train_list.txt'))

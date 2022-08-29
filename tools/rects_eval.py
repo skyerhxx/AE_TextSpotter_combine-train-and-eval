@@ -8,7 +8,7 @@ from collections import defaultdict
 from collections import OrderedDict
 import os.path as osp
 import Polygon as plg
-
+import argparse
 import numpy as np
 from PIL import Image
 import editdistance
@@ -153,9 +153,18 @@ def trans_gt_format(img_name, gt):
 
 
 def main():
-    cfg = mmcv.Config.fromfile('local_configs/rects_ae_textspotter_lm_r50_1x.py')
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--cfg_file", type=str, default='results/original+sem/', required=True, help="save_path")
+    parser.add_argument("--pred_file", type=str, default='results/original+sem/', required=True, help="save_path")
+    
+    opt = parser.parse_args()
+
+
+    # cfg = mmcv.Config.fromfile('local_configs/rects_ae_textspotter_lm_r50_1x.py')
+    cfg = mmcv.Config.fromfile(opt.cfg_file)
+    
     gt_root = cfg.data.val.data_root + cfg.data.val.ann_file
-    preds = mmcv.load('results.json')
+    preds = mmcv.load(opt.pred_file)
 
     preds_bdd = []
     gts_bdd = []

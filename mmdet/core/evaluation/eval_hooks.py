@@ -76,6 +76,7 @@ class DistEvalHook(Hook):
 class DistEvalmAPHook(DistEvalHook):
 
     def evaluate(self, runner, results):
+        import pdb; pdb.set_trace()
         gt_bboxes = []
         gt_labels = []
         gt_ignore = []
@@ -136,7 +137,6 @@ class CocoDistEvalRecallHook(DistEvalHook):
 
 
 class CocoDistEvalmAPHook(DistEvalHook):
-
     def evaluate(self, runner, results):
         tmp_file = osp.join(runner.work_dir, 'temp_0')
         result_files = results2json(self.dataset, results, tmp_file)

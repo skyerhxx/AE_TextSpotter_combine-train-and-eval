@@ -91,6 +91,13 @@ class ReCTSDataset(CustomDataset):
 
         return self._parse_ann_info(ann_info, img_info)
 
+    def get_img_info(self, idx):
+        img_info = self.img_infos[idx]
+        # ann_path = osp.join(self.ann_root, img_info['annfile'])
+        # ann_info = mmcv.load(ann_path)
+
+        return img_info
+
     def _filter_imgs(self, min_size=32):
         valid_inds = []
         for i, img_info in enumerate(self.img_infos):
