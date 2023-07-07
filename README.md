@@ -8,5 +8,11 @@ AE TextSpotter does not implement training and evaluating part in a unified code
 
 I write training and evaluating part in a unified code.
 
-The though is simple: take "test_cfg" and "test_pipeline" from test config file into train config file; data in config file also need to be added val part; implement an ReCTSEvalHook
+The modification is simple: 
+
+​				①take "test_cfg" and "test_pipeline" from test config file into train config file; 
+
+​				   data in config file also need to be added val part; 
+
+​				②implement an ReCTSEvalHook
 
